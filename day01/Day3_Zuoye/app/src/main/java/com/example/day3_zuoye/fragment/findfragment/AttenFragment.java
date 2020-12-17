@@ -1,28 +1,28 @@
-package com.example.day3_zuoye.fragment;
+package com.example.day3_zuoye.fragment.findfragment;
 
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.day3_zuoye.R;
-import com.example.day3_zuoye.fragment.findfragment.AttenFragment;
-import com.example.day3_zuoye.fragment.findfragment.RecoFragment;
-import com.google.android.material.tabs.TabLayout;
+import com.example.day3_zuoye.app.BaseApp;
+import com.example.day3_zuoye.bean.DataDTO;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link FindFragment#newInstance} factory method to
+ * Use the {@link AttenFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FindFragment extends Fragment {
+public class AttenFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -31,9 +31,9 @@ public class FindFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    private FindAdapter findAdapter;
+    private RecoAdapter recoAdapter;
 
-    public FindFragment() {
+    public AttenFragment() {
         // Required empty public constructor
     }
 
@@ -43,11 +43,11 @@ public class FindFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment FindFragment.
+     * @return A new instance of fragment AttenFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static FindFragment newInstance(String param1, String param2) {
-        FindFragment fragment = new FindFragment();
+    public static AttenFragment newInstance(String param1, String param2) {
+        AttenFragment fragment = new AttenFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -68,25 +68,39 @@ public class FindFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View inflate = inflater.inflate(R.layout.fragment_find, container, false);
+        View inflate = inflater.inflate(R.layout.fragment_atten, container, false);
         initView(inflate);
+        initData();
         return inflate;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        initData();
+    }
+
+    private void initData() {
+        recoAdapter.list.clear();
+        List<DataDTO> dataDTOS = BaseApp.getsInstance()
+                .getDaoSession()
+                .getDataDTODao()
+                .loadAll();
+        if (dataDTOS.size() != 0) {
+            for (int i = 0; i < dataDTOS.size(); i++) {
+                recoAdapter.booleans.add(false);
+            }
+            recoAdapter.list.addAll(dataDTOS);
+            recoAdapter.notifyDataSetChanged();
+        }
+    }
+
     private void initView(View inflate) {
-        TabLayout tab_find = inflate.findViewById(R.id.tab_find);
-        ViewPager vp_find = inflate.findViewById(R.id.vp_find);
-
-        ArrayList<Fragment> fragments = new ArrayList<>();
-        fragments.add(new AttenFragment());
-        fragments.add(new RecoFragment());
-        ArrayList<String> strings = new ArrayList<>();
-
-        strings.add("关注");
-        strings.add("推荐");
-        findAdapter = new FindAdapter(getActivity().getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT,fragments,strings);
-        vp_find.setAdapter(findAdapter);
-        tab_find.setupWithViewPager(vp_find);
-        vp_find.setCurrentItem(1);
+        RecyclerView rv_atten = inflate.findViewById(R.id.rv_atten);
+        rv_atten.setLayoutManager(new LinearLayoutManager(getActivity()));
+        ArrayList<DataDTO> list = new ArrayList<>();
+        ArrayList<Boolean> booleans = new ArrayList<>();
+        recoAdapter = new RecoAdapter(list, getActivity(),booleans);
+        rv_atten.setAdapter(recoAdapter);
     }
 }

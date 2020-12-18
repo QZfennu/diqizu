@@ -55,11 +55,11 @@ class RecoAdapter extends RecyclerView.Adapter {
             public void onClick(View v) {
                 if (aBoolean){
                     dataDTO.setHasFollow(false);
+                    notifyDataSetChanged();
                     BaseApp.getsInstance()
                             .getDaoSession()
                             .getDataDTODao()
                             .delete(list.get(position));
-                    notifyDataSetChanged();
                 }else {
                     dataDTO.setHasFollow(true);
                     notifyDataSetChanged();
